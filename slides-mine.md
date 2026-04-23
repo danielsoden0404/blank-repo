@@ -1,6 +1,6 @@
 ---
 marp: true
-theme: gaia
+theme: uncover
 pagination: true
 ---
 
@@ -32,9 +32,10 @@ pagination: true
 - this is me making changes to the file to see how it works with git and marp
 
 ```mermaid
-flowchart TD
-  A[Start] --> B{Decision}
-  B -->|Yes| C[Option 1]
-  B -->|No| D[Option 2]
-  C --> E[End]
+graph TD
+    A[Start] --> B{Is it working?}
+    B -- Yes --> C[Great!]
+    B -- No --> D[Check the code]
+    D --> E[Fix the issue]
+    E --> B
 ```
