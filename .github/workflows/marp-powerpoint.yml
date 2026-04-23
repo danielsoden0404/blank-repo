@@ -1,0 +1,27 @@
+name: Convert Markdown (slides) to PPTX
+
+on:
+  push:
+    branches: [develop, main]
+    paths:
+      - "**/*slides*.md"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate PowerPoint from Markdown
+        uses: KoharaKazuya/marp-cli-action@v2
+        with:
+          generate-pptx: true
+
+      - name: Save Markdown Powerpoints
+        uses: actions/upload-artifact@v4
+        with:
+          name: pptx-output
+          path: output/**/*.pptx
