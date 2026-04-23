@@ -24,4 +24,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pptx-output
-          path: **/*.pptx
+          path: "**/*.pptx"
