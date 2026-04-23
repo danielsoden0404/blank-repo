@@ -20,8 +20,8 @@ jobs:
         with:
           generate-pptx: true
 
-      - name: Save Markdown Powerpoints
-        uses: actions/upload-artifact@v4
+      - name: Commit generated PPTX
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          name: pptx-output
-          path: "**/*.pptx"
+          commit_message: "update generated PPTX slides"
+          file_pattern: "**/*.pptx"
