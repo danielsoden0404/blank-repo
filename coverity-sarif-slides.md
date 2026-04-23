@@ -2,15 +2,16 @@
 marp:true
 pagination:true
 theme: default
+style: |
+  table {
+    font-size: 0.5em;
+    height: 80%;
+    width: 80%;
+    border-collapse: collapse;
+  }
 ---
-
 # GitHub Code Scanning with Coverity — Presentation Slides
 
-<style>  
-table {  
-  font-size: 0.8em;  
-}  
-</style>  
 
 ---
 

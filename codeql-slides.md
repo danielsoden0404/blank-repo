@@ -8,6 +8,13 @@ pagination: true
 size: 16:9
 lang: en
 footer: "CodeQL • Static Analysis"
+style: |
+  table {
+    font-size: 0.5em;
+    height: 80%;
+    width: 80%;
+    border-collapse: collapse;
+  }
 ---
 
 # CodeQL
