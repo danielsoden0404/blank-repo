@@ -21,4 +21,6 @@ marp: true
   - Sub-item 2
   - Sub-item 3
 
+# Slide 3 - changes 
 
+- this is me making changes to the file to see how it works with git and marp
