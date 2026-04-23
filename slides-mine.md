@@ -1,8 +1,10 @@
 ---
 marp: true
+theme: gaia
+pagination: true
 ---
 
-# Slide 1 - Title
+# First Slide - Title
 
 - This is the first slide.
 
@@ -10,7 +12,9 @@ marp: true
 | -------- | -------- |
 | Data 1   | Data 2   |
 
-# Slide 2 - List
+---
+
+# Second Slide - List
 
 - This is the second slide.
 - It contains a list.
@@ -21,6 +25,16 @@ marp: true
   - Sub-item 2
   - Sub-item 3
 
-# Slide 3 - changes 
+---
+
+# Third Slide - changes
 
 - this is me making changes to the file to see how it works with git and marp
+
+```mermaid
+flowchart TD
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Option 1]
+  B -->|No| D[Option 2]
+  C --> E[End]
+```
