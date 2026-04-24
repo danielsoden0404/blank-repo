@@ -330,7 +330,9 @@ cov-format-sarif-for-github.js → coverity.sarif
   gzip + base64 → upload to GitHub
 ```
 
-### Multi-tier severity lookup
+---
+
+## Multi-tier severity lookup
 
 The script resolves each rule's score via a multi-tier lookup:
 
@@ -340,7 +342,9 @@ The script resolves each rule's score via a multi-tier lookup:
 | **1b** | Dotted prefix (`PW.*`, `RW.*`) | `PW.BAD_PRINTF_FORMAT_STRING` → `"3.0"` (Low) |
 | **2** | `defaultConfiguration.level` fallback | `error` → `"8.0"`, `warning` → `"6.0"`, `note` → `"3.0"` |
 
-### Representative per-checker scores
+---
+
+## Representative per-checker scores
 
 | Band | Score | Example checkers |
 |---|---|---|
@@ -448,5 +452,9 @@ For multiple build targets, use a different `tool_name` for each — GitHub trac
 ## Notes — Severity: Two Separate Fields
 
 GitHub tracks two independent severity fields — both are now active for Coverity alerts. The first is Severity, derived from the SARIF `level` field. The converter maps Coverity impact to `level`: High → `error`, Medium → `warning`, Low → `note`. GitHub displays this as Error, Warning, or Note on every alert, and the Alerts threshold row in Repository Rulesets evaluates this field. The second is Security severity, derived from the `properties.security-severity` numeric score on each rule. GitHub requires the rule's `properties.tags[]` to include `"security"` for this field to activate. GitHub translates the score using CVSS v3.1 qualitative bands: over 9.0 = Critical, 7.0–8.9 = High, 4.0–6.9 = Medium, 0.1–3.9 = Low. When a Security severity is present, GitHub displays it in preference to the basic Severity.
+
+---
+
+## Notes — Severity: Two Separate Fields
 
 `inject-security-severity.py` is deployed and runs after `cov-format-sarif-for-github.js` but before gzip/upload. It walks the SARIF `runs[].tool.driver.rules[]` array and injects three things into each rule: (1) a `properties.security-severity` string with a per-checker score from a 122-entry `CHECKER_TABLE`, (2) a `"security"` tag in `properties.tags[]` so GitHub activates the Security severity classification, and (3) a CWE tag (e.g. `"external/cwe/cwe-476"`) where a mapping exists. Scores are resolved via a multi-tier lookup: first by multi-segment key (3-seg → 2-seg → 1-seg, covering 122 entries across Critical at `"9.1"`, High at `"7.5"`–`"8.0"`, Medium at `"6.0"`, Low at `"3.0"`), then by dotted prefix (`PW.*` / `RW.*` → `"3.0"`), and finally by `defaultConfiguration.level` as a fallback. Fine-grained multi-segment entries provide more precise CWE mappings for specific sub-checker/event combinations (e.g. `TAINTED_STRING/tainted_string_sql` → CWE-89 instead of the base CWE-78). The value must be a JSON string — GitHub ignores numeric types. With per-checker scores present, the Security severity column appears in GitHub for every Coverity alert, and the Security alerts threshold row in Repository Rulesets is fully active. The full 122-entry checker table and implementation details are documented in GITHUB_SARIF_PROCESSING.md §5.
