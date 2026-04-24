@@ -34,10 +34,6 @@ Subtitle or brief intro sentence.
 
 # Comparison Table
 
-<style scoped>
-  section { font-size: 1.3rem; }
-</style>
-
 | Aspect | Option A | Option B |
 | --- | --- | --- |
 | Row 1 | Value | Value |
