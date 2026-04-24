@@ -7,9 +7,16 @@ theme: default
 <style>
   table {
     font-size: 0.5em;
-    height: 80%;
-    width: 80%;
+    width: 100%;
+    max-width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  td, th {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
 # GitHub Code Scanning with Coverity — Presentation Slides
