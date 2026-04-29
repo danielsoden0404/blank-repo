@@ -1,0 +1,49 @@
+name: Convert and Commit Markdown (slides) to PPTX with pandoc
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/docs/*slides*.md"
+      - "!**/*.pptx"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc
+        uses: pandoc/actions/setup@v1
+        with:
+          version: "3.9.0.2"
+
+      - name: Use pandoc for conversion
+        run: |
+          git ls-files '**/docs/*slides*.md' | while read -r file; do
+            name="$(basename "${file%.md}")"
+            output="slide-decks/${name}.pptx"
+            pandoc "$file" -t pptx --reference-doc="slide-decks/reference.pptx" -o "$output"
+          done
+
+      - name: Commit generated PPTX
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add slide-decks/*.pptx
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "update generated PPTX slides (${GITHUB_SHA:0:7})"
+          git push
+        env:
+          GITHUB_SHA: ${{ github.sha }}
