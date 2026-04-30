@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - "docs/*slides*.md"
-      - "!slide-decks/*.pptx"
 
 permissions:
   contents: write
@@ -52,5 +51,3 @@ jobs:
 
           git commit -m "update generated PPTX slides (${GITHUB_SHA:0:7})"
           git push
-        env:
-          GITHUB_SHA: ${{ github.sha }}
