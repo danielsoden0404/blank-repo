@@ -25,7 +25,6 @@ jobs:
 
       - name: Convert Markdown slides to PPTX
         run: |
-          mkdir -p slide-decks
 
           git ls-files 'docs/*slides*.md' | while read -r file; do
             name="$(basename "${file%.md}")"
