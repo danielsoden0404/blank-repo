@@ -6,6 +6,7 @@ date: 27 May 2026
 
 ## Slide 1: Title Slide
 
+This is a new line I want to see a regeneration of the title slide
 The YAML front matter block at the top of this file produces the title slide.
 
 - `title:` → main title text
@@ -30,6 +31,7 @@ Every `## ` heading starts a new **Title and Content** slide.
 
 Both `*` and `-` markers create bullet points.
 
+* Extra bullet point
 * This bullet uses an asterisk
 - This bullet uses a dash
 - This bullet uses a dash and has **bold text** and `inline code`
