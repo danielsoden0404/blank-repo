@@ -16,11 +16,6 @@ date: 29 May 2026
 
 # Section One
 
-## New slide
-
-- This is a new slide with some content
-> This is a blockquote that should render as italic
-
 ## Bullets and Inline Formatting
 
 - Status is good
