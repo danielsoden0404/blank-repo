@@ -20,16 +20,14 @@ jobs:
       - name: Convert Markdown slides to PPTX
         shell: bash
         run: |
-          shopt -s globstar nullglob
-
-          for file in docs/**/*slides*.md; do
+          for file in $(git diff --name-only HEAD~1 HEAD -- 'docs/**/*slides*.md'); do
             relative="${file#docs/}"
             out="slide-decks/${relative%.md}.pptx"
             mkdir -p "$(dirname "$out")"
 
             pandoc "$file" \
               --reference-doc=slide-decks/refSlide/reference.pptx \
-              -o "$out" 
+              -o "$out"
 
           done
 
