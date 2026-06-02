@@ -16,6 +16,14 @@ date: 29 May 2026
 
 # Section One
 
+## New slide
+
+- Status is good
+  - Developer Experience Improved
+  - Metrics on the ball
+
+> This blockqote should render as Italic!
+
 ## Bullets and Inline Formatting
 
 - Status is good
