@@ -18,8 +18,11 @@ date: 29 May 2026
 
 ## New slide
 
-- This is a new slide with some content
-> This is a blockquote that should render as italic
+- Status is good
+  - Developer Experience Improved
+  - Metrics on the ball
+
+> This blockqote should render as Italic!
 
 ## Bullets and Inline Formatting
 
