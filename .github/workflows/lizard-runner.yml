@@ -4,6 +4,10 @@ on:
         branches:
             - main
 
+permissions:
+    contents: read
+    pull-requests: write
+
 jobs:
     lizard:
         runs-on: ubuntu-latest
@@ -25,7 +29,7 @@ jobs:
 
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA")
 
-                  python -c "
+                  TOTAL_COMPLEXITY=$(python -c "
                   import lizard, sys
                   total = 0
                   for file_path in sys.argv[1:]:
@@ -33,4 +37,19 @@ jobs:
                       for func in result.function_list:
                           total += func.cyclomatic_complexity
                   print(total)
-                  " $CHANGED_FILES
+                  " $CHANGED_FILES)
+
+                  echo "Total Cyclomatic Complexity of changed files: $TOTAL_COMPLEXITY"
+                  echo "TOTAL_COMPLEXITY=$TOTAL_COMPLEXITY" >> $GITHUB_ENV
+            - name: Add comment to PR with complexity result
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" -q '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("Lizard Cyclomatic Complexity"))) | .id' | head -n 1)
+
+                if [ -n "$COMMENT_ID" ]; then
+                  gh api -X DELETE "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}"
+                fi
+
+                gh pr comment "${{ github.event.pull_request.number }}" --body "## Lizard Cyclomatic Complexity Score: ${{ env.TOTAL_COMPLEXITY }}"
+
