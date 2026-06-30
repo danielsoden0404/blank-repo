@@ -25,14 +25,12 @@ jobs:
 
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA")
 
-                  python - $CHANGED_FILES <<'EOF'
-
+                  python -c "
                   import lizard, sys
-
                   total = 0
                   for file_path in sys.argv[1:]:
                       result = lizard.analyze_file(file_path)
                       for func in result.function_list:
                           total += func.cyclomatic_complexity
                   print(total)
-                  EOF
+                  " $CHANGED_FILES
