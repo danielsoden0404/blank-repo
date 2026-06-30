@@ -51,5 +51,5 @@ jobs:
                   gh api -X DELETE "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}"
                 fi
 
-                gh pr comment "${{ github.event.pull_request.number }}" --body "## Lizard Cyclomatic Complexity Score: ${{ env.TOTAL_COMPLEXITY }}"
+                gh pr comment "${{ github.event.pull_request.number }}" --body "## Lizard Cyclomatic Complexity Score\n\nTotal complexity: ${{ env.TOTAL_COMPLEXITY }}"
 
