@@ -29,18 +29,27 @@ jobs:
 
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA")
 
-                  TOTAL_COMPLEXITY=$(python -c "
+                  python -c "
                   import lizard, sys
-                  total = 0
+                  individual_scores = {}
+                  average = 0
                   for file_path in sys.argv[1:]:
                       result = lizard.analyze_file(file_path)
+                      file_score = 0
                       for func in result.function_list:
-                          total += func.cyclomatic_complexity
-                  print(total)
-                  " $CHANGED_FILES)
-
-                  echo "Total Cyclomatic Complexity of changed files: $TOTAL_COMPLEXITY"
-                  echo "TOTAL_COMPLEXITY=$TOTAL_COMPLEXITY" >> $GITHUB_ENV
+                          file_score += func.cyclomatic_complexity
+                      if len(result.function_list) > 0:
+                          individual_scores[file_path] = file_score / len(result.function_list)
+                      else:
+                          individual_scores[file_path] = 0
+                  if len(individual_scores.values()) > 0:
+                      average = sum(individual_scores.values()) / len(individual_scores.values())
+                  lines = ['## Lizard Cyclomatic Complexity', '', f'PR Complexity : {average:.2f}', '', 'Files:']
+                  for filepath, score in individual_scores.items():
+                      lines.append(f'- {filepath} : {score:.2f}')
+                  with open('complexity_comment.md', 'w') as f:
+                      f.write('\n'.join(lines))
+                  " $CHANGED_FILES
             - name: Add comment to PR with complexity result
               env:
                 GH_TOKEN: ${{ github.token }}
@@ -51,5 +60,5 @@ jobs:
                   gh api -X DELETE "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}"
                 fi
 
-                gh pr comment "${{ github.event.pull_request.number }}" --body "## Lizard Cyclomatic Complexity Score: ${{ env.TOTAL_COMPLEXITY }}"
+                gh pr comment "${{ github.event.pull_request.number }}" --body-file complexity_comment.md
 
