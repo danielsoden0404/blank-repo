@@ -1,0 +1,38 @@
+name: Lizard-runner
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    lizard:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-python@v6
+              with:
+                python-version: '3.13'
+            - uses: actions/checkout@v5
+              with:
+                fetch-depth: 0
+            - name: Run Lizard script on changed files
+              run: |
+                  pip install lizard
+
+                  BASE_SHA="${{ github.event.pull_request.base.sha }}"
+                  HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+                  git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+
+                  CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA")
+
+                  python - $CHANGED_FILES <<'EOF'
+
+                  import lizard, sys
+
+                  total = 0
+                  for file_path in sys.argv[1:]:
+                      result = lizard.analyze_file(file_path)
+                      for func in result.function_list:
+                          total += func.cyclomatic_complexity
+                  print(total)
+                  EOF
