@@ -29,36 +29,20 @@ jobs:
 
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA")
 
-                  python -c "
-                  import lizard, sys
-                  individual_scores = {}
-                  average = 0
-                  for file_path in sys.argv[1:]:
-                      result = lizard.analyze_file(file_path)
-                      file_score = 0
-                      for func in result.function_list:
-                          file_score += func.cyclomatic_complexity
-                      if len(result.function_list) > 0:
-                          individual_scores[file_path] = file_score / len(result.function_list)
-                      else:
-                          individual_scores[file_path] = 0
-                  if len(individual_scores.values()) > 0:
-                      average = sum(individual_scores.values()) / len(individual_scores.values())
-                  lines = ['## Lizard Cyclomatic Complexity', '', f'PR Complexity : {average:.2f}', '', 'Files:']
-                  for filepath, score in individual_scores.items():
-                      lines.append(f'- {filepath} : {score:.2f}')
-                  with open('complexity_comment.md', 'w') as f:
-                      f.write('\n'.join(lines))
-                  " $CHANGED_FILES
+                  AVERAGE_COMPLEXITY=$(lizard --csv $CHANGED_FILES \
+                  | awk -F',' 'NR>1 {sum+=$2; count++} END {if(count>0) printf "%.2f", sum/count; else print "0"}')
+
+                  printf '## Lizard Cyclomatic Complexity\n\nPR Complexity: %s\n' "$AVERAGE_COMPLEXITY" > complexity_comment.md
+
             - name: Add comment to PR with complexity result
               env:
                 GH_TOKEN: ${{ github.token }}
+                GITHUB_REPOSITORY: ${{ github.repository }}
+                GITHUB_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
               run: |
-                COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" -q '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("Lizard Cyclomatic Complexity"))) | .id' | head -n 1)
+                COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST_NUMBER}/comments" -q '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("Lizard Cyclomatic Complexity"))) | .id' | head -n 1)
 
-                if [ -n "$COMMENT_ID" ]; then
-                  gh api -X DELETE "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}"
-                fi
+                [ -n "$COMMENT_ID" ] && gh api -X DELETE "repos/${GITHUB_REPOSITORY}/issues/comments/${COMMENT_ID}"
 
-                gh pr comment "${{ github.event.pull_request.number }}" --body-file complexity_comment.md
+                gh pr comment "$GITHUB_PULL_REQUEST_NUMBER" --body-file complexity_comment.md
 
