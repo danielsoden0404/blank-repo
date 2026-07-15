@@ -1,0 +1,69 @@
+name: Lizard scan - Identifying cyclomatic complexity of a pull request
+
+on:
+  workflow_call:
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    lizard:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-python@v6
+              with:
+                python-version: '3.13'
+            - uses: actions/checkout@v5
+              with:
+                fetch-depth: 0
+
+            - name: Run Lizard script on changed files
+              run: |
+                  pip install lizard
+
+                  BASE_SHA="${{ github.event.pull_request.base.sha }}"
+                  HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+                  git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+
+                  CHANGED_FILES_FILE="$(mktemp)"
+                  git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$HEAD_SHA" > "$CHANGED_FILES_FILE"
+
+                  if [ ! -s "$CHANGED_FILES_FILE" ]; then
+                    echo '{"overall_mean_ccn": 0, "files": []}' > lizard_output.json
+                  else
+                    xargs -0 python .github/workflows/lizard_analyze.py < "$CHANGED_FILES_FILE" > lizard_output.json
+                  fi
+
+                  echo "Lizard output:"
+                  cat lizard_output.json
+
+            - name: Add comment to PR with complexity result
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: |
+                OVERALL=$(jq '.overall_mean_ccn // 0' lizard_output.json)
+                FILES_BULLETS=$(jq -r '
+                  if (.files | length) == 0 then
+                    "- No changed files with analyzable functions."
+                  else
+                    .files[] | "- \(.path): \(.avg_ccn)"
+                  end
+                ' lizard_output.json)
+
+                COMMENT_BODY=$(cat <<EOF
+                ## Lizard Cyclomatic Complexity
+                Overall mean CCN: ${OVERALL}
+
+                ${FILES_BULLETS}
+                EOF
+                )
+
+                COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+                  -q '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("Lizard Cyclomatic Complexity"))) | .id' | head -n 1)
+
+                if [ -n "$COMMENT_ID" ]; then
+                  gh api -X DELETE "repos/${{ github.repository }}/issues/comments/${COMMENT_ID}"
+                fi
+
+                gh pr comment "${{ github.event.pull_request.number }}" --body "$COMMENT_BODY"

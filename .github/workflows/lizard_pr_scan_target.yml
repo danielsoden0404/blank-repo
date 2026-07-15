@@ -1,0 +1,14 @@
+name: Lizard Cyclomatic complexity calculation
+
+on: 
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  call-lizard-pr-workflow:
+    uses: danielsoden0404/blank-repo/.github/workflows/lizard_pr_scan.yml@lizard-complexity-median
