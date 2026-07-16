@@ -11,4 +11,5 @@ permissions:
   pull-requests: write
 jobs:
   call-lizard-pr-workflow:
-    uses: danielsoden0404/blank-repo/.github/workflows/lizard_pr_scan.yml@lizard-complexity-median
+    uses: danielsoden0404/blank-repo/.github/workflows/lizard_pr_scan.yml@main
+    
