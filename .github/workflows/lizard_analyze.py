@@ -3,6 +3,7 @@ import os
 import fnmatch
 import json
 from typing import Optional
+from statistics import median
 import argparse
 
 def _get_args():
@@ -116,17 +117,16 @@ def main():
         total_functions += path_functions
         files.extend(path_files)
 
-    overall_mean_ccn = round(
-        sum(file_result["avg_ccn"] for file_result in files) / len(files),
-        2,
-    ) if files else 0
+    median_ccn = round(median(
+        file_result["avg_ccn"] for file_result in files
+    ), 2) if files else 0
 
     payload = {
-        "overall_mean_ccn": overall_mean_ccn,
+        "median_ccn": median_ccn,
         "files": files,
     }
 
-    print(json.dumps(payload))
+    print(payload['median_ccn'])
 
 if __name__ == "__main__":
     main()
