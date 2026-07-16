@@ -30,7 +30,7 @@ jobs:
                   git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$HEAD_SHA" > "$CHANGED_FILES_FILE"
 
                   if [ ! -s "$CHANGED_FILES_FILE" ]; then
-                    echo '{"overall_mean_ccn": 0, "files": []}' > lizard_output.json
+                    echo '{"median_ccn": 0, "files": []}' > lizard_output.json
                   else
                     xargs -0 python .github/workflows/lizard_analyze.py < "$CHANGED_FILES_FILE" > lizard_output.json
                   fi
@@ -42,18 +42,20 @@ jobs:
               env:
                 GH_TOKEN: ${{ github.token }}
               run: |
-                OVERALL=$(jq '.overall_mean_ccn // 0' lizard_output.json)
+                OVERALL=$(jq 'if type == "object" then (.median_ccn // 0) else . end' lizard_output.json)
                 FILES_BULLETS=$(jq -r '
-                  if (.files | length) == 0 then
+                  if type != "object" then
+                    "- No changed files with analyzable functions."
+                  elif (.files | length) == 0 then
                     "- No changed files with analyzable functions."
                   else
-                    .files[] | "- \(.path): \(.avg_ccn)"
+                    .files[] | "- \(.path): \(.median_ccn // .avg_ccn // 0)"
                   end
                 ' lizard_output.json)
 
                 COMMENT_BODY=$(cat <<EOF
                 ## Lizard Cyclomatic Complexity
-                Overall mean CCN: ${OVERALL}
+                Overall median CCN: ${OVERALL}
 
                 ${FILES_BULLETS}
                 EOF
