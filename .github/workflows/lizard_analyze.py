@@ -126,7 +126,7 @@ def main():
         "files": files,
     }
 
-    print(payload['median_ccn'])
+    print(json.dumps(payload))
 
 if __name__ == "__main__":
     main()
